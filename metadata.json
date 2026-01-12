@@ -1,0 +1,8 @@
+
+{
+  "name": "SkyAI - Real-time Weather Widget",
+  "description": "A premium, real-time location-based weather dashboard powered by Gemini AI with search grounding for accurate local forecasts and AI-generated insights.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}

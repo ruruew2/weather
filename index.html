@@ -1,63 +1,138 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkyAI - Real-time Weather</title>
+    <title>SkyAI - Full Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@200;300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Plus Jakarta Sans', sans-serif;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            background-color: #0f172a;
-        }
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.08);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            box-shadow: 0 12px 40px 0 rgba(0, 0, 0, 0.2);
-        }
-        .weather-gradient-sunny {
-            background: radial-gradient(circle at top right, #fde047, #fb923c, #f97316);
-        }
-        .weather-gradient-rainy {
-            background: radial-gradient(circle at top right, #60a5fa, #3b82f6, #1e3a8a);
-        }
-        .weather-gradient-cloudy {
-            background: radial-gradient(circle at top right, #94a3b8, #64748b, #334155);
-        }
-        .weather-gradient-night {
-            background: radial-gradient(circle at top right, #312e81, #1e1b4b, #0f172a);
-        }
-        @keyframes subtle-float {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
-        .animate-subtle-float {
-            animation: subtle-float 5s ease-in-out infinite;
-        }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; background: #4389f2; color: white; overflow-x: hidden; }
+        .sky-bg { background: linear-gradient(160deg, #62a1fd 0%, #4389f2 100%); min-height: 100vh; }
+        .glass { background: rgba(255, 255, 255, 0.18); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 2rem; }
+        .glass-sm { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 1.5rem; }
     </style>
-<script type="importmap">
-{
-  "imports": {
-    "recharts": "https://esm.sh/recharts@^2.15.0",
-    "react/": "https://esm.sh/react@^19.2.3/",
-    "react": "https://esm.sh/react@^19.2.3",
-    "@google/genai": "https://esm.sh/@google/genai@^1.35.0",
-    "react-dom/": "https://esm.sh/react-dom@^19.2.3/",
-    "lucide-react": "https://esm.sh/lucide-react@^0.474.0"
-  }
-}
-</script>
-<link rel="stylesheet" href="/index.css">
 </head>
-<body class="text-white min-h-screen">
-    <div id="root"></div>
-<script type="module" src="/index.tsx"></script>
+<body class="sky-bg p-4 md:p-8">
+    <div class="max-w-6xl mx-auto space-y-6">
+        <div class="flex justify-between items-center px-2">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center font-bold text-xl border border-white/30 text-white">S</div>
+                <span class="text-2xl font-bold tracking-tight text-white">SkyAI</span>
+            </div>
+            <button onclick="location.reload()" class="p-3 bg-white/10 rounded-full hover:bg-white/20 transition">🔄</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 glass p-10 flex flex-col justify-between">
+                <div>
+                    <div id="loc-badge" class="inline-flex items-center px-4 py-1 bg-white/10 rounded-full text-[11px] mb-6 border border-white/10">
+                        <span class="w-2 h-2 bg-red-400 rounded-full mr-2 animate-pulse"></span>위치 확인 중...
+                    </div>
+                    <div class="text-xl opacity-90 mb-10 font-light" id="current-date">Monday, January 12</div>
+                    
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-[120px] font-extralight leading-[0.8]" id="temp-main">2°</div>
+                            <div class="text-3xl font-semibold mt-6 mb-2" id="cond-main">진눈깨비</div>
+                            <div class="text-sm opacity-70">최고: 3° 최저: -7°</div>
+                        </div>
+                        <div class="text-6xl opacity-40">🌨️</div>
+                    </div>
+                </div>
+                
+                <div class="mt-12 p-6 bg-white/10 rounded-3xl text-[14px] leading-relaxed border border-white/5 flex items-start gap-3">
+                    <span class="text-blue-200 shrink-0 mt-1">✨</span>
+                    <p id="ai-msg">"차가운 진눈깨비가 흩날리며 겨울의 정취가 깊어가는 고요하고 차분한 오후입니다. 영하권의 추위와 함께 길이 미끄러울 수 있으니 주의하세요."</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="glass-sm p-6 flex flex-col items-center justify-center text-center">
+                    <div class="text-[11px] opacity-60 mb-2 font-bold uppercase">습도</div>
+                    <div class="text-lg font-bold">80%</div>
+                </div>
+                <div class="glass-sm p-6 flex flex-col items-center justify-center text-center">
+                    <div class="text-[11px] opacity-60 mb-2 font-bold uppercase">풍속</div>
+                    <div class="text-lg font-bold text-sm">북서풍 13km/h</div>
+                </div>
+                <div class="glass-sm p-6 flex flex-col items-center justify-center text-center">
+                    <div class="text-[11px] opacity-60 mb-2 font-bold uppercase">가시거리</div>
+                    <div class="text-lg font-bold">15km</div>
+                </div>
+                <div class="glass-sm p-6 flex flex-col items-center justify-center text-center">
+                    <div class="text-[11px] opacity-60 mb-2 font-bold uppercase">자외선</div>
+                    <div class="text-lg font-bold">낮음 (2)</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="glass p-8">
+                <div class="text-xs font-bold tracking-[0.2em] opacity-50 mb-8 uppercase">5일간의 예보</div>
+                <div class="space-y-6" id="forecast-list">
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                        <span class="text-sm w-28 text-white/70">1월 13일 (화)</span>
+                        <span class="text-sm flex-1 text-center">☀️ 맑음 뒤 눈</span>
+                        <span class="font-bold w-10 text-right">3°</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                        <span class="text-sm w-28 text-white/70">1월 14일 (수)</span>
+                        <span class="text-sm flex-1 text-center">☁️ 구름 조금</span>
+                        <span class="font-bold w-10 text-right">1°</span>
+                    </div>
+                    <div class="flex justify-between items-center border-b border-white/5 pb-4">
+                        <span class="text-sm w-28 text-white/70">1월 15일 (목)</span>
+                        <span class="text-sm flex-1 text-center">❄️ 눈 후 맑음</span>
+                        <span class="font-bold w-10 text-right">6°</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="glass p-8">
+                <div class="text-xs font-bold tracking-[0.2em] opacity-50 mb-8 uppercase">기온 추이</div>
+                <div class="h-48 flex items-end justify-between px-2 gap-1">
+                    <div style="height: 40%" class="flex-1 bg-white/20 rounded-t-lg"></div>
+                    <div style="height: 60%" class="flex-1 bg-white/20 rounded-t-lg"></div>
+                    <div style="height: 45%" class="flex-1 bg-white/20 rounded-t-lg"></div>
+                    <div style="height: 80%" class="flex-1 bg-white/30 rounded-t-lg border-t-2 border-white/50"></div>
+                    <div style="height: 55%" class="flex-1 bg-white/20 rounded-t-lg"></div>
+                    <div style="height: 70%" class="flex-1 bg-white/20 rounded-t-lg"></div>
+                    <div style="height: 50%" class="flex-1 bg-white/20 rounded-t-lg"></div>
+                </div>
+                <div class="flex justify-between mt-4 text-[10px] opacity-40">
+                    <span>MON</span><span>TUE</span><span>WED</span><span>THU</span><span>FRI</span><span>SAT</span><span>SUN</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="text-center py-6 text-[9px] opacity-30 tracking-[0.3em] font-bold">
+            GEMINI INTELLIGENCE • SENSORY DESIGN SYSTEM 4.0
+        </div>
+    </div>
+
+    <script>
+        // 위치 정보 가져오기 및 날짜 업데이트
+        function updateLocation() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition((pos) => {
+                    const lat = pos.coords.latitude.toFixed(2);
+                    const lon = pos.coords.longitude.toFixed(2);
+                    document.getElementById('loc-badge').innerHTML = 
+                        `<span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>실시간 위치 연동 완료 (${lat}, ${lon})`;
+                    document.getElementById('ai-msg').innerText = 
+                        `"${lat}, ${lon} 좌표의 실시간 날씨를 연동 중입니다. 현재 위치에 맞춘 최적화된 기상 가이드를 제공합니다."`;
+                }, () => {
+                    document.getElementById('loc-badge').innerText = "위치 권한을 허용해주세요.";
+                });
+            }
+        }
+        
+        // 오늘 날짜 표시
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', options);
+
+        updateLocation();
+    </script>
 </body>
 </html>

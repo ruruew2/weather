@@ -133,6 +133,26 @@
         document.getElementById('current-date').innerText = new Date().toLocaleDateString('en-US', options);
 
         updateLocation();
+
+        if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+        const lat = pos.coords.latitude;
+        const lon = pos.coords.longitude;
+        
+        // 1. 가입 필요 없는 API로 날씨 가져오기
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current_weather=true`);
+        const data = await res.json();
+        const weather = data.current_weather;
+
+        // 2. 화면에 숫자 꽂아넣기
+        document.getElementById('loc-display').innerHTML = `<span class="w-2 h-2 bg-green-400 rounded-full mr-2"></span>실시간 위치 연동 중`;
+        document.getElementById('temp-main').innerText = `${Math.round(weather.temperature)}°`; // 진짜 온도
+        document.getElementById('cond-main').innerText = "현재 기온 실시간 반영됨"; 
+        
+        // 위도 경도 숫자 뜨던 건 조용히 삭제하거나 구석으로!
+        console.log("현재 좌표:", lat, lon); 
+    });
+}
     </script>
 </body>
 </html>
